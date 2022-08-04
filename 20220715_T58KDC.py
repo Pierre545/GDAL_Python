@@ -22,6 +22,7 @@ import osr
 import cv2
 from raster2array import *
 from fct_replace import *
+from bin_fct import *
 
 #%%
 #Chemins dirigéant vers les différentes variables 
@@ -54,17 +55,16 @@ array_CARNAMA = ds_CARNAMA.ReadAsArray()
 #%%
 # Changement de résolution 
 
-
 # Resampled by a factor of 2 with nearest interpolation
 array_SWIR = scipy.ndimage.zoom(array_SWIR, 2, order=0)
 
 
-# Resampled by a factor of 2 with bilinear interpolation
-print (scipy.ndimage.zoom(array, 2, order=1))
+# # Resampled by a factor of 2 with bilinear interpolation
+# print (scipy.ndimage.zoom(array, 2, order=1))
 
 
-# Resampled by a factor of 2 with cubic interpolation
-print( scipy.ndimage.zoom(array, 2, order=3))
+# # Resampled by a factor of 2 with cubic interpolation
+# print( scipy.ndimage.zoom(array, 2, order=3))
 
 
 #%%
@@ -78,38 +78,6 @@ NDWI2 = (array_B03-array_B08)/(array_B03+array_B08)
 
 #%%
 #Remplacement des NaN value par 0
-
-NDVI = replace(np.NaN,0,NDVI)
-            
-            
-#%%
-# Binarisation du NDVI et du NDWI2
-
-r,c = np.shape(NDVI)
-
-NDVI_bin = np.copy(NDVI)
-NDWI2_bin = np.copy(NDWI2) 
-
-for i in range(r):
-    for j in range(c):
-        if (NDVI_bin[i,j]>=0.3):
-            NDVI_bin[i,j] = 1
-        else:
-            NDVI_bin[i,j] = 0
-            
-        if(NDWI2_bin[i,j]>=0):
-            NDWI2_bin[i,j] = 1
-        else:
-            NDWI2_bin[i,j] = 0
-
-
-#%%
-# Application des masks NDVI et NDWI2 sur la bande11, sur la zone d'intéret choisis par l'utilisateur.
-
-#Création d'un mask binaire commun entre NDVI, NDWI2 et CARNAMA
-
-NDVI_NDWI2_bin = NDVI_bin + NDWI2_bin
-
 r,c = np.shape(NDVI_NDWI2_bin)
 for i in range(r):
     for j in range(c):
@@ -119,6 +87,28 @@ for i in range(r):
         if (array_CARNAMA[i,j]>0):
             array_CARNAMA[i,j]=1
             
+NDVI = replace(np.NaN,0,NDVI)
+            
+            
+#%%
+# Binarisation du NDVI et du NDWI2
+
+r,c = np.shape(NDVI)
+
+NDVI_bin = bin(NDVI,0,0.3)
+NDWI2_bin = bin(NDWI2,0,99999) 
+
+
+#%%
+# Application des masks NDVI et NDWI2 sur la bande11, sur la zone d'intéret choisis par l'utilisateur.
+
+#Création d'un mask binaire commun entre NDVI, NDWI2 et CARNAMA
+
+NDVI_NDWI2_bin = NDVI_bin + NDWI2_bin 
+
+NDVI_NDWI2_bin = bin(NDVI,1,99999)
+array_CARNAMA = bin(array_CARNAMA,0,99999)
+
 array_SWIR_Mask = np.copy(array_SWIR)
 array_SWIR_Mask = array_SWIR_Mask * NDVI_NDWI2_bin
 
@@ -131,6 +121,7 @@ array_SWIR_Mask_ROI = array_SWIR_Mask*array_CARNAMA
 
 array_SWIR_Mask_ROI = replace(0,np.NaN,array_SWIR_Mask_ROI)
 
+#%%
 Q1 = np.nanquantile(array_SWIR_Mask_ROI, .1)
 Q99 = np.nanquantile(array_SWIR_Mask_ROI, .99)
 
@@ -193,17 +184,9 @@ dst_filename = '/home/pierreaudisio/Bureau/Mangrove/SENTINEL-2/SENTINEL2A_202207
 array_to_raster(raster, array_SWIR_Mask_ROI, dst_filename)
 
 
+dst_filename = '/home/pierreaudisio/Bureau/Mangrove/SENTINEL-2/SENTINEL2A_20220715-232215-638_L2A_T58KDC_C_V3-0/Projet_mangrove/NDVI'
+array_to_raster(raster,NDVI_bin, dst_filename)
 
+dst_filename = '/home/pierreaudisio/Bureau/Mangrove/SENTINEL-2/SENTINEL2A_20220715-232215-638_L2A_T58KDC_C_V3-0/Projet_mangrove/NDWI2'
+array_to_raster(raster, NDWI2_bin, dst_filename)
 
-
-
-
-
-
-
-
-
-
-
-
- 
