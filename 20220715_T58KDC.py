@@ -194,4 +194,4 @@ def mangrove_chain(path):
     dst_filename = 'dir_folder'+'NDWI2'
     array_to_raster(raster, NDWI2_bin, dst_filename)
     
-    
+    return()
