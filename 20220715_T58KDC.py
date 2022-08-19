@@ -171,8 +171,9 @@ def mangrove_chain(path):
     #Sauvegarde du résultat avec la projection correspondante
     print("okay12")
     
-    dir_folder = os.mkdir("/home/pierreaudisio/Bureau/test_resultats")
-    
+    if not ( os.path.exists("/home/pierreaudisio/Bureau/test_resultats")):
+      dir_folder = os.mkdir("/home/pierreaudisio/Bureau/test_resultats")
+      
     raster = ds_B08
     
     dst_filename = 'dir_folder'+'sarray_CARNAMA_buffer'
