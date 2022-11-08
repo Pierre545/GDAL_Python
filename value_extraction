@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov  7 15:14:32 2022
+
+@author: pierreaudisio
+"""
+
+from osgeo import gdal
+import numpy as np
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+#%%
+# Récupérer les coordonnées d'un pixel
+
+def world2Pixel(geoMatrix, x, y):
+  ulX = geoMatrix[0]
+  ulY = geoMatrix[3]
+  xDist = geoMatrix[1]
+  yDist = geoMatrix[5]
+  rtnX = geoMatrix[2]
+  rtnY = geoMatrix[4]
+  pixel = int((x - ulX) / xDist)
+  line = int((y - ulY) / yDist)
+  return (line,pixel)
+
+
+#%%
+#Test visualisation zone extraite
+
+from PIL import Image
+Image.fromarray(array_test).save('/home/pierreaudisio/Bureau/test.tif')
+
+#%%
+#Couches d'intéret
+
+path = '/home/pierreaudisio/Bureau/Mangrove/Images_SAT/SENTINEL-2/Nouvelle-Calédonie/KEC/work'
+file_1 = os.listdir(path)
+file_2 = os.listdir(path+'/'+file_1[3])
+
+x = np.array(([518794,518794,518794,518794,518794,518794,518794,518794,518794,518794]))
+y = np.array(([7701943,7702254,7702477,7702775,7703004,7703326
+               ,7703724,7703966,7704282,7704802]))
+
+bands = np.array((['B2','B3','B4','B5','B8','B11','B12']))
+bands_value_20181001={'B2':[],'B3':[],'B4':[],'B5':[],'B8':[],'B11':[],'B12':[]}
+
+
+for i in bands :
+    for name in file_2:
+        if (i in name):
+            if ('FRE' in name):
+                if not ( '.aux.xml'  in  name ):
+                    if not ( 'B8A'  in  name ):
+                        print(name)
+    
+                        dataset = gdal.Open(path+'/'+file_1[3]+'/' + name)
+                        geotrans = dataset.GetGeoTransform()
+                            
+                        for j in range(len(x)):
+                            x_px,y_px = world2Pixel(geotrans, x[j], y[j] )
+                            array = dataset.ReadAsArray() 
+                            array_crop = array[ x_px-1:x_px+2 , y_px-1:y_px+2 ]
+                            bands_value_20181001[i].append(array_crop.mean())
+                    
+
+
+#%%
+#Conversion en fichier csv
+
+# Create DataFrame
+data = pd.DataFrame(bands_value_20181001)
+
+pd.options.display.float_format = '{:.2f}'.format
+
+data['ID'] = ['0_Foret','1_Mangrove', '2_Mangrove','3_Pont','4_Embouchure',
+             '5_Embouchure','6_Mangrove','7_Mangrove','8_Plage','9_Lagon']
+
+ # Write to CSV file
+path_csv = '/home/pierreaudisio/Bureau/Mangrove/QGIS_tif_shp/RGB_Indices_S2_T58KEC/VieuxTouho_S2_T58KEC/'
+data.to_csv( path_csv + "bands_value_20181001.csv", float_format='%.2f')
+ 
