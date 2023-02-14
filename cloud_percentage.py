@@ -10,7 +10,6 @@ import os
 from zipfile import ZipFile
 from zipfile import BadZipFile
 
-all_xml = []
 
 # Repository containing the product folder
 directory = "/media/pierreaudisio/Maxtor/IRD/Sentinel2/Nouvelle_Calédonie"
@@ -40,7 +39,7 @@ for i in folders:
 
 # Using except to avoid inturreption of the processing because of a corrupt file
     except BadZipFile:
-            print("Error with:  ",file_xml)
+            print("Error with:  ",directory_zip)
             
             
             
