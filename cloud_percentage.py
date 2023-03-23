@@ -20,26 +20,28 @@ n = 0
 cloud_percent= {}
 
 for i in folders:
-    directory_zip = directory + "/" + i
+    if (".zip" in i):
+        
+        directory_zip = directory + "/" + i
 
-    try:
-        with ZipFile(directory_zip) as myzip:
-            a = ZipFile.namelist(myzip)
-            file_xml = a[0] 
-            file_xml = file_xml[:48] + "/" + file_xml[:48] + "_MTD_ALL.xml"
-            
-            with myzip.open(file_xml) as myfile:
-                _xml = (myfile.read())
+        try:
+            with ZipFile(directory_zip) as myzip:
+                a = ZipFile.namelist(myzip)
+                file_xml = a[0] 
+                file_xml = file_xml[:48] + "/" + file_xml[:48] + "_MTD_ALL.xml"
 
-# Searching cloud percentage on xml file
-                cloud_file = _xml.decode("utf-8")
-                position = cloud_file.find("CloudPercent")
-                cloud_percent[directory_zip[61:]] = cloud_file[position+14:position+16]
-                n += 1
+                with myzip.open(file_xml) as myfile:
+                    _xml = (myfile.read())
 
-# Using except to avoid inturreption of the processing because of a corrupt file
-    except BadZipFile:
-            print("Error with:  ",directory_zip)
+    # Searching cloud percentage on xml file
+                    cloud_file = _xml.decode("utf-8")
+                    position = cloud_file.find("CloudPercent")
+                    cloud_percent[directory_zip[61:]] = cloud_file[position+14:position+16]
+                    n += 1
+
+    # Using except to avoid inturreption of the processing because of a corrupt file
+        except BadZipFile:
+                print("Error with:  ",directory_zip)
             
             
             
