@@ -9,8 +9,8 @@ from sentinelsat import SentinelAPI
 
 def S2tile_fromLATLON (lat,lon):
     
-    USER = "pierre_545"
-    PASSWORD = "Zoomzoom05!"
+    USER = "XXX"
+    PASSWORD = "XXX"
     
     # query scenes
     api = SentinelAPI(USER, PASSWORD, 'https://scihub.copernicus.eu/dhus')
