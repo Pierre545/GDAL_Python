@@ -52,13 +52,13 @@ def array_to_raster(raster, array):
     return output_raster.GetRasterBand(1) 
 
 #%%
-    def raster2array(raster, array, outpath, OutPutName):
+    def raster2array(raster, array_bis, outpath, OutPutName):
 
     # Write to TIFF
     kwargs = raster.meta
     kwargs.update(dtype=rasterio.float32, count=1, compress='lzw')
 
     with rasterio.open(os.path.join(outpath, str(OutPutName) + '.tif'), 'w', **kwargs) as dst:
-        dst.write_band(1, tensor.astype(rasterio.float32))
+        dst.write_band(1, array_bis.astype(rasterio.float32))
 
     return ()
